@@ -1,0 +1,11 @@
+{> import app/contact.{type Contact}
+{> with contacts as List(Contact)
+
+<ul id="contacts">
+  {% for contact as Contact in contacts %}
+  <li>
+    <span>Name: {{contact.name}}</span>
+    <span>Email: {{contact.email}}</span>
+  </li>
+  {% endfor %}
+</ul>

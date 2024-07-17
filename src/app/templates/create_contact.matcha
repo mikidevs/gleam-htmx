@@ -1,0 +1,9 @@
+<form hx-swap="outerHTML" hx-target="#contacts" hx-post="/contacts">
+  <label for="name">Name:</label>
+  <input id="name" type="text" name="name">
+  <br>
+  <label for="email">Email:</label>
+  <input type="text" name="email">
+  <br>
+  <button type="submit">Create Contact</button>
+</form>

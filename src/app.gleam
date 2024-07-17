@@ -6,6 +6,7 @@ import wisp
 pub fn main() {
   wisp.configure_logger()
 
+  // Generating a secret key
   let secret_key_base = wisp.random_string(64)
 
   let assert Ok(_) =
