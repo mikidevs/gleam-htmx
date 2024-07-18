@@ -1,8 +1,12 @@
+import sqlight
 import wisp
+
+pub type Context {
+  Context(conn: sqlight.Connection)
+}
 
 // A request travels through the stack from top to bottom until it reaches a request handler
 // the response then travels back up through the stack
-
 pub fn middleware(
   req: wisp.Request,
   handle_request: fn(wisp.Request) -> wisp.Response,

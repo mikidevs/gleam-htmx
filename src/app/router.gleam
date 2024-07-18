@@ -1,18 +1,17 @@
 import app/contact.{Contact}
-import app/web
+import app/templates/contact_list
+import app/templates/index
+import app/web.{type Context}
 import gleam/http.{Get, Post}
 import gleam/list
 import gleam/result
 import wisp.{type Request, type Response}
 
-import app/templates/contact_list
-import app/templates/index
-
 const contacts = [
   Contact("John Doe", "jd@mail.com"), Contact("Alice Doe", "ad@mail.com"),
 ]
 
-pub fn handle_request(req: Request) -> Response {
+pub fn handle_request(req: Request, ctx: Context) -> Response {
   // apply middleware stack to this request/response
   use req <- web.middleware(req)
 
