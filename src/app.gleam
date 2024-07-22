@@ -12,10 +12,11 @@ pub fn main() {
   // Generating a secret key
   let secret_key_base = wisp.random_string(64)
 
+  use conn <- sqlight.with_connection(":memory:")
+  let assert Ok(Nil) = database.migrate_schema(conn)
+
   let handle_request = fn(req) {
-    use conn <- sqlight.with_connection(":memory:")
-    let assert Ok(Nil) = database.migrate_schema(conn)
-    let ctx = Context(conn: conn)
+    let ctx = Context(db: conn)
     router.handle_request(req, ctx)
   }
 

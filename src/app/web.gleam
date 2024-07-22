@@ -1,8 +1,11 @@
+import app/error.{type AppError}
+import gleam/list
+import gleam/result
 import sqlight
 import wisp
 
 pub type Context {
-  Context(conn: sqlight.Connection)
+  Context(db: sqlight.Connection)
 }
 
 // A request travels through the stack from top to bottom until it reaches a request handler
@@ -24,4 +27,10 @@ pub fn middleware(
   use req <- wisp.handle_head(req)
 
   handle_request(req)
+}
+
+pub fn key_find(list: List(#(k, v)), key: k) -> Result(v, AppError) {
+  list
+  |> list.key_find(key)
+  |> result.replace_error(error.UnprocessableEntity)
 }
