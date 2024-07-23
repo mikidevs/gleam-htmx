@@ -63,7 +63,10 @@ pub fn list_contacts(db: sqlight.Connection) -> List(Contact) {
   rows
 }
 
-pub fn has_email(email: String, conn: sqlight.Connection) -> Bool {
+pub fn has_email(
+  email: String,
+  conn: sqlight.Connection,
+) -> Result(Nil, error.AppError) {
   let sql =
     "
     select email
@@ -78,9 +81,14 @@ pub fn has_email(email: String, conn: sqlight.Connection) -> Bool {
       with: [sqlight.text(email)],
       expecting: contact_row_decoder(),
     )
+    |> result.map_error(fn(error) {
+      case error.code, error.message {
+        _, _ -> error.BadRequest(error.message)
+      }
+    })
 
   case rows {
-    [] -> False
-    _ -> True
+    [] -> Ok(Nil)
+    _ -> Error(error.BadRequest("This email already exists"))
   }
 }

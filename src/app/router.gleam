@@ -1,5 +1,6 @@
 import app/contact.{Contact}
 import app/templates/contact_list
+import app/templates/create_contact
 import app/templates/index
 import app/web.{type Context}
 import gleam/http.{Get, Post}
@@ -31,6 +32,7 @@ fn add_contact(req: Request, ctx: Context) -> Response {
   let result = {
     use name <- result.try(web.key_find(form_data.values, "name"))
     use email <- result.try(web.key_find(form_data.values, "email"))
+    use _ <- result.try(contact.has_email(email, ctx.db))
     use id <- result.try(contact.insert_contact(name, email, ctx.db))
 
     Ok(Contact(id, name, email))
@@ -43,7 +45,8 @@ fn add_contact(req: Request, ctx: Context) -> Response {
       |> wisp.html_response(200)
     }
     Error(_) -> {
-      wisp.bad_request()
+      contact_list.render_builder()
+      |> wisp.bad_request()
     }
   }
 }

@@ -4,7 +4,7 @@ pub type AppError {
   NotFound
   MethodNotAllowed
   ContactNotFound
-  BadRequest
+  BadRequest(message: String)
   UnprocessableEntity
   ContentRequired
   SqlightError(sqlight.Error)
