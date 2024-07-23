@@ -1,10 +1,13 @@
 import app/contact.{Contact}
-import app/templates/contact_list
-import app/templates/create_contact
-import app/templates/index
+import app/error
+import app/views/contact_list
+import app/views/create_contact_form
+import app/views/index
 import app/web.{type Context}
 import gleam/http.{Get, Post}
+import gleam/io
 import gleam/result
+import gleam/string_builder
 import wisp.{type Request, type Response}
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
@@ -38,15 +41,19 @@ fn add_contact(req: Request, ctx: Context) -> Response {
     Ok(Contact(id, name, email))
   }
 
+  let _ = result |> io.debug
+
   case result {
     Ok(contact) -> {
       let contacts = contact.list_contacts(ctx.db)
       contact_list.render_builder(contacts)
       |> wisp.html_response(200)
     }
-    Error(_) -> {
-      contact_list.render_builder()
-      |> wisp.bad_request()
+    Error(error.BadRequest(message)) -> {
+      message
+      |> string_builder.from_string
+      |> wisp.html_response(400)
     }
+    _ -> wisp.internal_server_error()
   }
 }

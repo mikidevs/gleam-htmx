@@ -2,7 +2,7 @@ import app/error.{type AppError}
 import gleam/list
 import gleam/result
 import sqlight
-import wisp
+import wisp.{type Response}
 
 pub type Context {
   Context(db: sqlight.Connection)
@@ -12,7 +12,7 @@ pub type Context {
 // the response then travels back up through the stack
 pub fn middleware(
   req: wisp.Request,
-  handle_request: fn(wisp.Request) -> wisp.Response,
+  handle_request: fn(wisp.Request) -> Response,
 ) -> wisp.Response {
   // Permit browsers to simulate methods other than GET and POST using the `_method` query parameter
   let req = wisp.method_override(req)
@@ -46,7 +46,7 @@ pub fn error_to_response(error: AppError) -> Response {
   case error {
     error.NotFound -> wisp.not_found()
     error.MethodNotAllowed -> wisp.method_not_allowed([])
-    error.BadRequest -> wisp.bad_request()
+    error.BadRequest(_) -> wisp.bad_request()
     error.UnprocessableEntity | error.ContentRequired ->
       wisp.unprocessable_entity()
     error.SqlightError(_) -> wisp.internal_server_error()

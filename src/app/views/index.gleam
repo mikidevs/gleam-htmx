@@ -1,0 +1,32 @@
+import app/contact.{type Contact}
+import app/views/contact_list
+import app/views/create_contact_form
+import gleam/string_builder
+import nakai
+import nakai/attr
+import nakai/html
+
+pub fn render(contacts: List(Contact)) -> html.Node {
+  html.Html([attr.lang("en-US")], [
+    html.Head([
+      html.Script(
+        [
+          attr.src("https://unpkg.com/htmx.org@2.0.1"),
+          attr.integrity(
+            "sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/",
+          ),
+          attr.crossorigin(),
+        ],
+        "",
+      ),
+      html.title("HTMX Testing in Gleam"),
+    ]),
+    html.Body([], [create_contact_form.render(), contact_list.render(contacts)]),
+  ])
+}
+
+pub fn render_builder(contacts: List(Contact)) -> string_builder.StringBuilder {
+  render(contacts)
+  |> nakai.to_inline_string
+  |> string_builder.from_string
+}
