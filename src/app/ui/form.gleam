@@ -3,6 +3,17 @@ import gleam/result
 import nakai/attr
 import nakai/html
 
+/// Create a variable of type form and pass it to the render method to return a form node
+/// let user = User("Mikaeel", "Salie", "miki@dev.com")
+///
+/// let with_data: Form =
+///   Form([
+///     TextControl("firstName", "First Name:", user.first_name),
+///     TextControl("lastName", "Last Name:", user.last_name),
+///     InvalidTextControl("email", "Email:", user.email, "Email is already used"),
+///   ])
+///
+/// render_form(with_data) |> nakai.to_inline_string |> io.println
 pub type Control {
   TextControl(id: String, label: String, value: String)
   InvalidTextControl(id: String, label: String, value: String, error: String)
@@ -12,11 +23,7 @@ pub type Form {
   Form(controls: List(Control))
 }
 
-pub type User {
-  User(first_name: String, last_name: String, email: String)
-}
-
-pub fn render_form(form: Form) -> html.Node {
+pub fn create(form: Form) -> html.Node {
   form.controls
   |> list.map(fn(control) {
     let input_elems =
