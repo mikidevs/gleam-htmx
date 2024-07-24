@@ -1,13 +1,15 @@
-import app/contact.{Contact}
+import app/contact
 import app/error
-import app/views/contact_list
 import app/views/create_contact_form
 import app/views/index
 import app/web.{type Context}
 import gleam/http.{Get, Post}
 import gleam/io
+import gleam/pair
 import gleam/result
-import gleam/string_builder
+import nakai
+import nakai/attr
+import nakai/html
 import wisp.{type Request, type Response}
 
 pub fn handle_request(req: Request, ctx: Context) -> Response {
@@ -32,27 +34,51 @@ fn add_contact(req: Request, ctx: Context) -> Response {
   use <- wisp.require_method(req, Post)
   use form_data <- wisp.require_form(req)
 
-  let result = {
+  let form_data = {
     use name <- result.try(web.key_find(form_data.values, "name"))
     use email <- result.try(web.key_find(form_data.values, "email"))
-    use _ <- result.try(contact.has_email(email, ctx.db))
-    use id <- result.try(contact.insert_contact(name, email, ctx.db))
-
-    Ok(Contact(id, name, email))
+    Ok(#(name, email))
   }
 
-  let _ = result |> io.debug
+  let insert =
+    result.try(form_data, fn(pair) {
+      case pair {
+        #(name, email) -> {
+          use _ <- result.try(contact.has_email(email, ctx.db))
+          contact.insert_contact(name, email, ctx.db)
+        }
+      }
+    })
 
-  case result {
+  let contact_result =
+    result.map(insert, fn(id) {
+      let form_values = result.unwrap(form_data, #("", ""))
+      contact.Contact(id, pair.first(form_values), pair.second(form_values))
+    })
+
+  case contact_result {
     Ok(contact) -> {
-      let contacts = contact.list_contacts(ctx.db)
-      contact_list.render_builder(contacts)
-      |> wisp.html_response(200)
+      wisp.ok()
+      |> wisp.string_body(
+        html.Fragment([
+          create_contact_form.render(#("", ""), ""),
+          html.div(
+            [attr.id("contacts"), attr.Attr("hx-swap-oob", "afterbegin")],
+            [
+              html.li([], [
+                html.span([], [html.Text(contact.name <> ": " <> contact.email)]),
+              ]),
+            ],
+          ),
+        ])
+        |> nakai.to_inline_string,
+      )
     }
-    Error(error.BadRequest(message)) -> {
-      message
-      |> string_builder.from_string
-      |> wisp.html_response(400)
+    Error(error.DuplicateEmail) -> {
+      result.unwrap(form_data, #("", ""))
+      |> io.debug
+      |> create_contact_form.render_builder("Email already exists")
+      |> wisp.html_response(422)
     }
     _ -> wisp.internal_server_error()
   }

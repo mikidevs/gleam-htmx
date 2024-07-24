@@ -31,19 +31,18 @@ pub fn insert_contact(
     returning id;
     "
 
-  result.map(
+  use rows <- result.then(
     sqlight.query(
       sql,
       on: db,
       with: [sqlight.text(name), sqlight.text(email)],
       expecting: dynamic.element(0, dynamic.int),
-    ),
-    fn(rows) {
-      let assert [id] = rows
-      id
-    },
+    )
+    |> result.map_error(fn(error) { error.BadRequest }),
   )
-  |> result.map_error(fn(err) { error.SqlightError(err) })
+
+  let assert [id] = rows
+  Ok(id)
 }
 
 pub fn list_contacts(db: sqlight.Connection) -> List(Contact) {
@@ -71,21 +70,16 @@ pub fn has_email(
     where contacts.email = ?1;
     "
 
-  let result =
+  let assert Ok(rows) =
     sqlight.query(
       sql,
       on: conn,
       with: [sqlight.text(email)],
-      expecting: contact_row_decoder(),
+      expecting: dynamic.element(0, dynamic.string),
     )
-    |> result.map_error(fn(error) {
-      case error.code, error.message {
-        _, _ -> error.BadRequest(error.message)
-      }
-    })
 
-  case result {
-    Ok([]) -> Ok(Nil)
-    _ -> Error(error.BadRequest("This email already exists"))
+  case rows {
+    [] -> Ok(Nil)
+    _ -> Error(error.DuplicateEmail)
   }
 }

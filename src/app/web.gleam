@@ -46,9 +46,9 @@ pub fn error_to_response(error: AppError) -> Response {
   case error {
     error.NotFound -> wisp.not_found()
     error.MethodNotAllowed -> wisp.method_not_allowed([])
-    error.BadRequest(_) -> wisp.bad_request()
+    error.BadRequest -> wisp.bad_request()
     error.UnprocessableEntity | error.ContentRequired ->
       wisp.unprocessable_entity()
-    error.SqlightError(_) -> wisp.internal_server_error()
+    error.DuplicateEmail -> wisp.unprocessable_entity()
   }
 }

@@ -19,9 +19,26 @@ pub fn render(contacts: List(Contact)) -> html.Node {
         ],
         "",
       ),
+      html.Script(
+        [],
+        "
+      // allow 422 and rerender with errors
+      document.addEventListener(\"DOMContentLoaded\", (event) => {
+        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+          if (evt.detail.xhr.status === 422) {
+            evt.detail.shouldSwap = true;
+            evt.detail.isError = false;
+          }
+        });
+      });
+      ",
+      ),
       html.title("HTMX Testing in Gleam"),
     ]),
-    html.Body([], [create_contact_form.render(), contact_list.render(contacts)]),
+    html.Body([], [
+      create_contact_form.render(#("", ""), ""),
+      contact_list.render(contacts),
+    ]),
   ])
 }
 

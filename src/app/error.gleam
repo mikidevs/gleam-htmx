@@ -1,10 +1,8 @@
-import sqlight
-
 pub type AppError {
   NotFound
   MethodNotAllowed
-  BadRequest(message: String)
+  DuplicateEmail
+  BadRequest
   UnprocessableEntity
   ContentRequired
-  SqlightError(sqlight.Error)
 }
