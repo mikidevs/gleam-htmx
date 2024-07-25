@@ -11,39 +11,6 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     _ -> wisp.not_found()
   }
 }
-// fn list_contacts(req: Request, ctx: Context) -> Response {
-//   use <- wisp.require_method(req, Get)
-//   let contacts = contact.list_contacts(ctx.db)
-//   index.render_builder(contacts)
-//   |> wisp.html_response(200)
-// }
-//
-// fn add_contact(req: Request, ctx: Context) -> Response {
-//   use <- wisp.require_method(req, Post)
-//   use form_data <- wisp.require_form(req)
-//
-//   let form_data = {
-//     use name <- result.try(web.key_find(form_data.values, "name"))
-//     use email <- result.try(web.key_find(form_data.values, "email"))
-//     Ok(#(name, email))
-//   }
-//
-//   let insert =
-//     result.try(form_data, fn(pair) {
-//       case pair {
-//         #(name, email) -> {
-//           use _ <- result.try(contact.has_email(email, ctx.db))
-//           contact.insert_contact(name, email, ctx.db)
-//         }
-//       }
-//     })
-//
-//   let contact_result =
-//     result.map(insert, fn(id) {
-//       let form_values = result.unwrap(form_data, #("", ""))
-//       contact.Contact(id, pair.first(form_values), pair.second(form_values))
-//     })
-//
 //   case contact_result {
 //     Ok(contact) -> {
 //       wisp.ok()

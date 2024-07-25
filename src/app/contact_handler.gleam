@@ -4,15 +4,16 @@ import app/views/index
 import app/web.{type Context}
 import gleam/dynamic
 import gleam/http.{Get, Post}
+import gleam/option
 import gleam/result.{try}
 import sqlight
-import wisp.{type Request, type Response}
+import wisp.{type FormData, type Request, type Response}
 
 // handler for `/contact`
 pub fn all(req: Request, ctx: Context) -> Response {
   case req.method {
     Get -> list_contacts(ctx)
-    // Post -> create_contact(req, ctx)
+    Post -> create_contact(req, ctx)
     _ -> wisp.method_not_allowed([Get, Post])
   }
 }
@@ -26,12 +27,50 @@ pub fn list_contacts(ctx: Context) -> Response {
   }
 }
 
+pub fn create_contact(req: Request, ctx: Context) -> Response {
+  use form_data <- wisp.require_form(req)
+
+  let contact_r = {
+    use contact <- try(decode_contact(form_data))
+    Ok(contact)
+  }
+
+  // There is probably a better way to this using try and try_recover
+  let result = {
+    case contact_r {
+      Ok(contact) -> {
+        case email_exists(contact.email, ctx) {
+          Error(_) -> contact_r |> result.replace_error(error.DuplicateEmail)
+          _ -> Ok(contact)
+        }
+      }
+      _ -> Error(error.UnprocessableEntity)
+    }
+  }
+
+  case result {
+    Ok(contact) -> wisp.ok()
+    Error(error.UnprocessableEntity) -> wisp.unprocessable_entity()
+    Error(error.DuplicateEmail) -> wisp.unprocessable_entity()
+    _ -> wisp.internal_server_error()
+  }
+}
+
+// Form Handling
+
+fn decode_contact(form_data: FormData) -> Result(Contact, Nil) {
+  try(form_data |> dynamic.from |> contact_decoder(), fn(contact) {
+    Ok(contact)
+  })
+  |> result.nil_error
+}
+
 // Data Access
 
-pub fn contact_row_decoder() -> dynamic.Decoder(Contact) {
+fn contact_decoder() -> dynamic.Decoder(Contact) {
   dynamic.decode3(
     contact.Contact,
-    dynamic.element(0, dynamic.int),
+    dynamic.element(0, dynamic.optional(dynamic.int)),
     dynamic.element(1, dynamic.string),
     dynamic.element(2, dynamic.string),
   )
@@ -50,11 +89,33 @@ pub fn read_contacts(db: sqlight.Connection) -> Result(List(Contact), Nil) {
       sql,
       on: db,
       with: [],
-      expecting: contact_row_decoder(),
+      expecting: contact_decoder(),
     ))
     Ok(rows)
   }
   |> result.nil_error
+}
+
+pub fn email_exists(email: String, ctx: Context) -> Result(Nil, error.AppError) {
+  let sql =
+    "
+    select email
+    from contacts
+    where contacts.email = ?1;
+    "
+
+  let assert Ok(rows) =
+    sqlight.query(
+      sql,
+      on: ctx.db,
+      with: [sqlight.text(email)],
+      expecting: dynamic.element(0, dynamic.string),
+    )
+
+  case rows {
+    [] -> Ok(Nil)
+    _ -> Error(error.DuplicateEmail)
+  }
 }
 //
 // // Returns id of contact
@@ -82,30 +143,5 @@ pub fn read_contacts(db: sqlight.Connection) -> Result(List(Contact), Nil) {
 //   case rows {
 //     [id] -> Ok(id)
 //     _ -> Error(Nil)
-//   }
-// }
-//
-// pub fn has_email(
-//   email: String,
-//   conn: sqlight.Connection,
-// ) -> Result(Nil, error.AppError) {
-//   let sql =
-//     "
-//     select email
-//     from contacts
-//     where contacts.email = ?1;
-//     "
-//
-//   let assert Ok(rows) =
-//     sqlight.query(
-//       sql,
-//       on: conn,
-//       with: [sqlight.text(email)],
-//       expecting: dynamic.element(0, dynamic.string),
-//     )
-//
-//   case rows {
-//     [] -> Ok(Nil)
-//     _ -> Error(error.DuplicateEmail)
 //   }
 // }

@@ -1,3 +1,5 @@
+import gleam/option.{type Option}
+
 pub type Contact {
-  Contact(id: Int, name: String, email: String)
+  Contact(id: Option(Int), name: String, email: String)
 }
