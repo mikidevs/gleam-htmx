@@ -47,12 +47,10 @@ pub fn create(
 
   html.table([], [
     html.thead([], [
-      html.tr(
-        [],
-        list.map(table.header.elements, fn(elem) {
-          html.th_text([attr.Attr("scope", "col")], elem)
-        }),
-      ),
+      html.tr([], {
+        use elem <- list.map(table.header.elements)
+        html.th_text([attr.Attr("scope", "col")], elem)
+      }),
     ]),
     html.tbody([], {
       use row <- list.map(table.rows)

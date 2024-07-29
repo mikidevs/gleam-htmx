@@ -4,7 +4,6 @@ import app/views/index
 import app/web.{type Context}
 import gleam/dynamic
 import gleam/http.{Get, Post}
-import gleam/option
 import gleam/result.{try}
 import sqlight
 import wisp.{type FormData, type Request, type Response}
