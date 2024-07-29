@@ -16,7 +16,7 @@ pub fn main() {
   let assert Ok(Nil) = database.migrate_schema(conn)
 
   let handle_request = fn(req) {
-    let ctx = Context(db: conn)
+    let ctx = Context(db: conn, static_directory: static_directory())
     router.handle_request(req, ctx)
   }
 
@@ -27,4 +27,9 @@ pub fn main() {
     |> mist.start_http
 
   process.sleep_forever()
+}
+
+pub fn static_directory() -> String {
+  let assert Ok(priv_directory) = wisp.priv_directory("app")
+  priv_directory <> "/static"
 }

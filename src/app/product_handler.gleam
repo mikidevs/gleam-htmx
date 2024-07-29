@@ -1,13 +1,14 @@
 import app/error.{type AppError}
 import app/product.{type Product}
-import app/views/index
+import app/ui/layout
 import app/web.{type Context}
 import gleam/dynamic
 import gleam/http.{Get, Post}
 import gleam/list
 import gleam/result.{try}
+import nakai
 import sqlight
-import wisp.{type FormData, type Request, type Response}
+import wisp.{type Request, type Response}
 
 // `/products`
 pub fn all(req: Request, ctx: Context) -> Response {
@@ -21,7 +22,7 @@ pub fn list_products(req: Request, ctx: Context) -> Response {
   // read headers
   let result = read_products(ctx.db)
   case result {
-    Ok(products) -> products |> layout.with_content |> wisp.html_response
+    Ok(products) -> wisp.ok()
     Error(err) -> web.error_to_response(err)
   }
 }
