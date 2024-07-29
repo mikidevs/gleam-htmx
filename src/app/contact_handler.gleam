@@ -26,35 +26,6 @@ pub fn list_contacts(ctx: Context) -> Response {
   }
 }
 
-pub fn create_contact(req: Request, ctx: Context) -> Response {
-  use form_data <- wisp.require_form(req)
-
-  let contact_r = {
-    use contact <- try(decode_contact(form_data))
-    Ok(contact)
-  }
-
-  // There is probably a better way to this using try and try_recover
-  let result = {
-    case contact_r {
-      Ok(contact) -> {
-        case email_exists(contact.email, ctx) {
-          Error(_) -> contact_r |> result.replace_error(error.DuplicateEmail)
-          _ -> Ok(contact)
-        }
-      }
-      _ -> Error(error.UnprocessableEntity)
-    }
-  }
-
-  case result {
-    Ok(contact) -> wisp.ok()
-    Error(error.UnprocessableEntity) -> wisp.unprocessable_entity()
-    Error(error.DuplicateEmail) -> wisp.unprocessable_entity()
-    _ -> wisp.internal_server_error()
-  }
-}
-
 // Form Handling
 
 fn decode_contact(form_data: FormData) -> Result(Contact, Nil) {
@@ -94,29 +65,6 @@ pub fn read_contacts(db: sqlight.Connection) -> Result(List(Contact), Nil) {
   }
   |> result.nil_error
 }
-
-pub fn email_exists(email: String, ctx: Context) -> Result(Nil, error.AppError) {
-  let sql =
-    "
-    select email
-    from contacts
-    where contacts.email = ?1;
-    "
-
-  let assert Ok(rows) =
-    sqlight.query(
-      sql,
-      on: ctx.db,
-      with: [sqlight.text(email)],
-      expecting: dynamic.element(0, dynamic.string),
-    )
-
-  case rows {
-    [] -> Ok(Nil)
-    _ -> Error(error.DuplicateEmail)
-  }
-}
-//
 // // Returns id of contact
 // pub fn create_contact(
 //   name: String,

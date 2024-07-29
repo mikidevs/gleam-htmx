@@ -1,5 +1,8 @@
+import app/error
 import gleam/float
-import gleam/option.{type Option}
+import gleam/result.{try}
+
+const currency_symbol = "R"
 
 pub type Category {
   Accessories
@@ -23,13 +26,7 @@ pub type Product {
 }
 
 pub type ProductData {
-  ProductData(
-    id: Option(Int),
-    name: String,
-    category: String,
-    price: String,
-    status: String,
-  )
+  ProductData(name: String, category: String, price: String, status: String)
 }
 
 pub fn serialise_product(product: Product) -> ProductData {
@@ -41,7 +38,7 @@ pub fn serialise_product(product: Product) -> ProductData {
   }
 
   let price = case product.price {
-    Currency(symbol, value) -> symbol <> float.to_string(value)
+    Currency(_, value) -> float.to_string(value)
   }
 
   let status = case product.status {
@@ -50,9 +47,38 @@ pub fn serialise_product(product: Product) -> ProductData {
     OutOfStock -> "OutOfStock"
   }
 
-  ProductData(option.None, product.name, category, price, status)
+  ProductData(product.name, category, price, status)
 }
 
-pub fn deserialise_product(product_data: ProductData) -> Product {
-  todo
+pub fn deserialise_product(
+  product_data: ProductData,
+) -> Result(Product, error.AppError) {
+  let category_ = case product_data.category {
+    "Accessories" -> Ok(Accessories)
+    "Clothing" -> Ok(Clothing)
+    "Electronics" -> Ok(Electronics)
+    "Fitness" -> Ok(Fitness)
+    _ -> Error(error.InvalidSerialisation)
+  }
+
+  let price_ =
+    case product_data.price {
+      str -> {
+        use value <- try(float.parse(str))
+        Ok(Currency(currency_symbol, value))
+      }
+    }
+    |> result.replace_error(error.InvalidSerialisation)
+
+  let status_ = case product_data.status {
+    "InStock" -> Ok(InStock)
+    "LowStock" -> Ok(LowStock)
+    "OutOfStock" -> Ok(OutOfStock)
+    _ -> Error(error.InvalidSerialisation)
+  }
+
+  use category <- try(category_)
+  use price <- try(price_)
+  use status <- try(status_)
+  Ok(Product(product_data.name, category, price, status))
 }
