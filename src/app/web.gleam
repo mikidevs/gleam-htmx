@@ -1,6 +1,4 @@
 import app/error.{type AppError}
-import gleam/list
-import gleam/result
 import sqlight
 import wisp.{type Response}
 
@@ -15,6 +13,7 @@ pub fn try_(result: Result(t, AppError), next: fn(t) -> Response) -> Response {
   }
 }
 
+// TODO: Return Error Pages based on App Errors
 pub fn error_to_response(error: AppError) -> Response {
   case error {
     error.NotFound -> wisp.not_found()
@@ -22,6 +21,7 @@ pub fn error_to_response(error: AppError) -> Response {
     error.BadRequest -> wisp.bad_request()
     error.UnprocessableEntity | error.ContentRequired ->
       wisp.unprocessable_entity()
-    error.InvalidSerialisationTarget -> wisp.internal_server_error()
+    error.InvalidSerialisation -> wisp.internal_server_error()
+    error.SqlightError -> wisp.internal_server_error()
   }
 }

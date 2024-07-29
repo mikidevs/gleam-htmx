@@ -8,6 +8,7 @@ pub type AppError {
   UnprocessableEntity
   ContentRequired
   InvalidSerialisation
+  SqlightError
 }
 
 pub fn key_find(list: List(#(k, v)), key: k) -> Result(v, AppError) {

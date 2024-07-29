@@ -4,6 +4,7 @@ import app/views/index
 import app/web.{type Context}
 import gleam/dynamic
 import gleam/http.{Get, Post}
+import gleam/list
 import gleam/result.{try}
 import sqlight
 import wisp.{type FormData, type Request, type Response}
@@ -27,17 +28,26 @@ pub fn list_products(req: Request, ctx: Context) -> Response {
 
 // Data Access
 
-fn product_decoder() -> dynamic.Decoder(Product) {
-  dynamic.decode5(
-    product.Product,
-    dynamic.element(0, dynamic.optional(dynamic.int)),
-    dynamic.element(1, dynamic.dynamic.int),
-    dynamic.element(2, dynamic.dynamic.int),
-    dynamic.element(3, dynamic.dynamic.int),
-    dynamic.element(4, dynamic.dynamic.int),
+fn product_data_decoder() -> dynamic.Decoder(product.ProductData) {
+  dynamic.decode4(
+    product.ProductData,
+    dynamic.element(0, dynamic.string),
+    dynamic.element(1, dynamic.string),
+    dynamic.element(2, dynamic.string),
+    dynamic.element(3, dynamic.string),
   )
 }
 
 fn read_products(db: sqlight.Connection) -> Result(List(Product), AppError) {
-  todo
+  let sql =
+    "
+    select name, category, price, status
+    from product
+    order by id asc
+    "
+  try(
+    sqlight.query(sql, on: db, with: [], expecting: product_data_decoder())
+      |> result.replace_error(error.SqlightError),
+    fn(rows) { list.map(rows, product.deserialise_product) |> result.all },
+  )
 }
