@@ -1,4 +1,4 @@
-# Customer and Organisation Management
+# Gleam + HTMX REST Example
 
 An example code base that shows a web application in Gleam using HTMX as a library.
 Meant to demonstrate features commonly found in enterprise frontend systems, such as forms and data tables
@@ -9,7 +9,7 @@ Meant to demonstrate features commonly found in enterprise frontend systems, suc
 
 ## TODO
 
+- Paginated data tables
 - HTML validation
 - Async form validation
 - Multi-step forms
-- Paginated data tables
