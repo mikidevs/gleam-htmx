@@ -1,4 +1,6 @@
 import app/error.{type AppError}
+import gleam/list
+import gleam/result
 import sqlight
 import wisp.{type Response}
 
@@ -24,4 +26,10 @@ pub fn error_to_response(error: AppError) -> Response {
     error.InvalidSerialisation -> wisp.internal_server_error()
     error.SqlightError -> wisp.internal_server_error()
   }
+}
+
+pub fn key_find(list: List(#(k, v)), key: k) -> Result(v, AppError) {
+  list
+  |> list.key_find(key)
+  |> result.replace_error(error.UnprocessableEntity)
 }

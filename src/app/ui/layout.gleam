@@ -31,7 +31,7 @@ fn nav() -> Node {
       ),
       html.hr([]),
     ]),
-    html.div([class("flex flex-col")], [
+    html.div([hx.boost(True), class("flex flex-col")], [
       a_text([attr.href("/"), hx.target("body"), class(link_style)], "Home"),
       a_text(
         [attr.href("/products"), hx.target("#content"), class(link_style)],
