@@ -21,28 +21,8 @@ pub fn all(req: Request, ctx: Context) -> Response {
   }
 }
 
-fn read_all_headers(
-  req: Request,
-  next: fn(List(#(String, String))) -> Response,
-) -> Response {
-  case req {
-    request.Request(_, headers, _, _, _, _, _, _) -> headers
-  }
-  |> next
-}
-
-fn read_header(
-  req: Request,
-  header: String,
-  next: fn(Result(String, AppError)) -> Response,
-) -> Response {
-  use headers <- read_all_headers(req)
-  web.key_find(headers, header)
-  |> next
-}
-
 pub fn list_products(req: Request, ctx: Context) -> Response {
-  use header <- read_header(req, "hx-request")
+  use header <- web.read_header(req, "hx-request")
 
   case header {
     // Table
