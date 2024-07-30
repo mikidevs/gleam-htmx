@@ -5,10 +5,11 @@ import gleam/result.{try}
 const currency_symbol = "R"
 
 pub type Category {
-  Accessories
-  Clothing
   Electronics
-  Fitness
+  Audio
+  OfficeSupplies
+  ComputerAccessories
+  Smartphones
 }
 
 pub type Currency {
@@ -31,10 +32,11 @@ pub type ProductData {
 
 pub fn serialise_product(product: Product) -> ProductData {
   let category = case product.category {
-    Accessories -> "Accessories"
-    Clothing -> "Clothing"
     Electronics -> "Electronics"
-    Fitness -> "Fitness"
+    Audio -> "Audio"
+    OfficeSupplies -> "OfficeSupplies"
+    ComputerAccessories -> "ComputerAccessories"
+    Smartphones -> "Smartphones"
   }
 
   let price = case product.price {
@@ -54,10 +56,11 @@ pub fn deserialise_product(
   product_data: ProductData,
 ) -> Result(Product, error.AppError) {
   let category_ = case product_data.category {
-    "Accessories" -> Ok(Accessories)
-    "Clothing" -> Ok(Clothing)
     "Electronics" -> Ok(Electronics)
-    "Fitness" -> Ok(Fitness)
+    "Audio" -> Ok(Audio)
+    "OfficeSupplies" -> Ok(OfficeSupplies)
+    "ComputerAccessories" -> Ok(ComputerAccessories)
+    "Smartphones" -> Ok(Smartphones)
     _ -> Error(error.InvalidSerialisation)
   }
 

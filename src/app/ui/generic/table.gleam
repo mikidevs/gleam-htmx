@@ -1,26 +1,24 @@
 import gleam/list
-import nakai/attr
+import nakai/attr.{class}
 import nakai/html
 
 /// Create a list of the type that you want to map to your rows
-/// The create function takes the name, a Header, the list of values and then a mapper that maps the value to a Row
+/// The create function takes a Header, the list of values and then a mapper that maps the value to a Row
 ///
-/// let organisations: List(Organisation) = [
-///   Organisation("Standard Bank", "2006/10", Active, "24/07/2024"),
-///   Organisation("Mr Price", "2006/12", Active, "22/07/2024"),
+/// let customer: List(Customer) = [
+///   Customer("Jane Doe", "24/07/1997"),
+///   Customer("Mary Price", "22/07/2002"),
 /// ]
 ///
-/// let header = Header(["Name", "Registration Number", "Status", "Last Updated"])
-/// let org_mapper = fn(org: Organisation) -> Row {
+/// let header = Header(["Name", "Date of Birth"])
+/// let customer_mapper = fn(customer: Customer) -> Row {
 ///   Row([
-///     org.name,
-///     org.registration_number,
-///     org.status |> string.inspect,
-///     org.last_updated,
+///     customer.name,
+///     customer.date_of_birth,
 ///   ])
 /// }
 ///
-/// create("Organisations", header, organisations, org_mapper)
+/// table.create(header, customers, customer_mapper)
 /// |> nakai.to_inline_string
 /// |> io.println
 pub type Row {
@@ -32,29 +30,36 @@ pub type Header {
 }
 
 pub type Table {
-  Table(title: String, header: Header, rows: List(Row))
+  Table(header: Header, rows: List(Row))
 }
 
 pub fn create(
-  title: String,
   header: Header,
   data: List(a),
   data_mapper: fn(a) -> Row,
 ) -> html.Node {
   let table =
     list.map(data, data_mapper)
-    |> Table(title, header, _)
+    |> Table(header, _)
 
-  html.table([], [
+  html.table([class("w-full border-collapse border border-slate-600")], [
     html.thead([], [
       html.tr([], {
         use elem <- list.map(table.header.elements)
-        html.th_text([attr.Attr("scope", "col")], elem)
+        html.th_text(
+          [class("border border-slate-600"), attr.Attr("scope", "col")],
+          elem,
+        )
       }),
     ]),
     html.tbody([], {
       use row <- list.map(table.rows)
-      html.tr([], list.map(row.elements, fn(elem) { html.td_text([], elem) }))
+      html.tr(
+        [],
+        list.map(row.elements, fn(elem) {
+          html.td_text([class("border border-slate-600 p-3.5")], elem)
+        }),
+      )
     }),
   ])
 }
