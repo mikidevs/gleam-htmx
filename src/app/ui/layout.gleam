@@ -23,7 +23,7 @@ fn head() -> Node {
 fn nav() -> Node {
   let link_style = "cursor-pointer px-6 py-3 hover:bg-slate-700"
 
-  html.nav([class("w-72 h-screen bg-slate-800 border-r border-slate-600")], [
+  html.nav([class("w-72 min-h-screen bg-slate-800 border-r border-slate-600")], [
     html.div([class("p-6")], [
       html.h1_text(
         [class("pb-6 text-2xl w-full text-center")],
@@ -58,6 +58,9 @@ pub fn empty() -> Node {
 pub fn with_content(content: Node) -> Node {
   html.Html([attr.lang("en-US")], [
     head(),
-    html.Body([class("flex")], [nav(), content]),
+    html.Body([class("flex")], [
+      nav(),
+      html.main([attr.id("content"), class("grow bg-slate-900 p-8")], [content]),
+    ]),
   ])
 }

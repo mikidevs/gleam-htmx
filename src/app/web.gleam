@@ -25,7 +25,6 @@ pub fn error_to_response(error: AppError) -> Response {
     error.UnprocessableEntity | error.ContentRequired ->
       wisp.unprocessable_entity()
     error.InvalidSerialisation -> wisp.internal_server_error()
-    error.SqlightError -> wisp.internal_server_error()
   }
 }
 

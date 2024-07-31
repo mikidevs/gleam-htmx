@@ -19,7 +19,7 @@ pub type Currency {
 pub type Status {
   InStock
   LowStock
-  OutOfStock
+  SoldOut
 }
 
 pub type Product {
@@ -27,26 +27,26 @@ pub type Product {
 }
 
 pub type ProductData {
-  ProductData(name: String, category: String, price: String, status: String)
+  ProductData(name: String, category: String, price: Float, status: String)
 }
 
 pub fn serialise_product(product: Product) -> ProductData {
   let category = case product.category {
     Electronics -> "Electronics"
     Audio -> "Audio"
-    OfficeSupplies -> "OfficeSupplies"
-    ComputerAccessories -> "ComputerAccessories"
+    OfficeSupplies -> "Office Supplies"
+    ComputerAccessories -> "Computer Accessories"
     Smartphones -> "Smartphones"
   }
 
   let price = case product.price {
-    Currency(_, value) -> float.to_string(value)
+    Currency(_, value) -> value
   }
 
   let status = case product.status {
-    InStock -> "InStock"
-    LowStock -> "LowStock"
-    OutOfStock -> "OutOfStock"
+    InStock -> "In Stock"
+    LowStock -> "Low Stock"
+    SoldOut -> "Sold Out"
   }
 
   ProductData(product.name, category, price, status)
@@ -58,25 +58,24 @@ pub fn deserialise_product(
   let category_ = case product_data.category {
     "Electronics" -> Ok(Electronics)
     "Audio" -> Ok(Audio)
-    "OfficeSupplies" -> Ok(OfficeSupplies)
-    "ComputerAccessories" -> Ok(ComputerAccessories)
+    "Office Supplies" -> Ok(OfficeSupplies)
+    "Computer Accessories" -> Ok(ComputerAccessories)
     "Smartphones" -> Ok(Smartphones)
     _ -> Error(error.InvalidSerialisation)
   }
 
   let price_ =
     case product_data.price {
-      str -> {
-        use value <- try(float.parse(str))
+      value -> {
         Ok(Currency(currency_symbol, value))
       }
     }
     |> result.replace_error(error.InvalidSerialisation)
 
   let status_ = case product_data.status {
-    "InStock" -> Ok(InStock)
-    "LowStock" -> Ok(LowStock)
-    "OutOfStock" -> Ok(OutOfStock)
+    "In Stock" -> Ok(InStock)
+    "Low Stock" -> Ok(LowStock)
+    "Sold Out" -> Ok(SoldOut)
     _ -> Error(error.InvalidSerialisation)
   }
 

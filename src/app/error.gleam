@@ -5,6 +5,4 @@ pub type AppError {
   UnprocessableEntity
   ContentRequired
   InvalidSerialisation
-  SqlightError
-  FileError
 }

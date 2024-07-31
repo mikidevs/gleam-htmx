@@ -33,11 +33,7 @@ pub type Table {
   Table(header: Header, rows: List(Row))
 }
 
-pub fn create(
-  header: Header,
-  data: List(a),
-  data_mapper: fn(a) -> Row,
-) -> html.Node {
+pub fn of(header: Header, data: List(a), data_mapper: fn(a) -> Row) -> html.Node {
   let table =
     list.map(data, data_mapper)
     |> Table(header, _)
