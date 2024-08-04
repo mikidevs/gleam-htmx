@@ -1,5 +1,5 @@
-import app/dashboard_handler
-import app/product_handler
+import app/handlers/dashboard
+import app/handlers/product
 import app/web.{type Context}
 import wisp.{type Request, type Response}
 
@@ -19,8 +19,8 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   use <- wisp.serve_static(req, under: "/static", from: ctx.static_directory)
 
   case wisp.path_segments(req) {
-    [] -> dashboard_handler.home(req)
-    ["products"] -> product_handler.all(req, ctx)
+    [] -> dashboard.home(req)
+    ["products"] -> product.all(req, ctx)
     _ -> wisp.not_found()
   }
 }

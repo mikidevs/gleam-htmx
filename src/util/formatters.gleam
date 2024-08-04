@@ -1,3 +1,4 @@
+import gleam/float
 import gleam/int
 import gleam/option.{type Option}
 import gleam/string
@@ -32,11 +33,20 @@ type Opt {
 @external(erlang, "erlang", "float_to_binary")
 fn float_to_binary(float: Float, options: List(Opt)) -> String
 
+pub fn format_float_str(
+  str: String,
+  decimal_places: Int,
+  thousands_separator: Option(String),
+) -> String {
+  let assert Ok(fl) = float.parse(str)
+  format_float(fl, decimal_places, thousands_separator)
+}
+
 pub fn format_float(
   data: Float,
   decimal_places: Int,
   thousands_separator: Option(String),
-) {
+) -> String {
   let assert Ok(#(before_decimal, after_decimal)) =
     data
     |> float_to_binary([Decimals(decimal_places)])

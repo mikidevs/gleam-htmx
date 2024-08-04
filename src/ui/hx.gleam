@@ -12,6 +12,10 @@ pub fn push_url(value: String) -> Attr {
   attr.Attr("hx-push-url", value)
 }
 
+pub fn trigger(value: String) -> Attr {
+  attr.Attr("hx-trigger", value)
+}
+
 pub fn boost(value: Bool) -> Attr {
   case value {
     True -> attr.Attr("hx-boost", "true")

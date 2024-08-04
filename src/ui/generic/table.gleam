@@ -21,8 +21,13 @@ import nakai/html
 /// table.create(header, customers, customer_mapper)
 /// |> nakai.to_inline_string
 /// |> io.println
+pub type Data {
+  Data(content: String)
+  StyledData(content: String, style: String)
+}
+
 pub type Row {
-  Row(elements: List(String))
+  Row(elements: List(Data))
 }
 
 pub type Header {
@@ -52,8 +57,15 @@ pub fn of(header: Header, data: List(a), data_mapper: fn(a) -> Row) -> html.Node
       use row <- list.map(table.rows)
       html.tr(
         [],
-        list.map(row.elements, fn(elem) {
-          html.td_text([class("border border-slate-600 p-3.5")], elem)
+        list.map(row.elements, fn(data) {
+          let style = case data {
+            StyledData(_, style) -> style
+            _ -> ""
+          }
+          html.td_text(
+            [class("border border-slate-600 p-3.5 " <> style)],
+            data.content,
+          )
         }),
       )
     }),

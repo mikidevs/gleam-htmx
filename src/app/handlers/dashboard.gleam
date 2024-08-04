@@ -1,6 +1,6 @@
-import app/ui/layout
 import gleam/http
 import nakai
+import ui/layout
 import wisp.{type Request, type Response}
 
 // `/`

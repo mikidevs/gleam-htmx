@@ -1,6 +1,6 @@
-import app/ui/hx
 import nakai/attr.{class}
 import nakai/html.{type Node, a_text}
+import ui/hx
 
 fn head() -> Node {
   html.Head([
@@ -50,9 +50,7 @@ fn nav() -> Node {
 }
 
 pub fn empty() -> Node {
-  with_content(
-    html.main([attr.id("content"), class("grow bg-slate-900 p-8")], []),
-  )
+  with_content(html.div([], []))
 }
 
 pub fn with_content(content: Node) -> Node {

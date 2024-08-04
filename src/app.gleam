@@ -1,6 +1,6 @@
-import app/database
 import app/router
 import app/web.{Context}
+import db/initialiser
 import gleam/erlang/process
 import mist
 import sqlight
@@ -13,7 +13,7 @@ pub fn main() {
   let secret_key_base = wisp.random_string(64)
 
   use conn <- sqlight.with_connection(":memory:")
-  let assert Ok(Nil) = database.migrate_schema(conn)
+  let assert Ok(Nil) = initialiser.migrate_schema(conn)
 
   let handle_request = fn(req) {
     let ctx = Context(db: conn, static_directory: static_directory())
