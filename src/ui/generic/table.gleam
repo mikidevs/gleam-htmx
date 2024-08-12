@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/list
 import nakai/attr.{class}
 import nakai/html
@@ -43,17 +44,19 @@ pub fn of(header: Header, data: List(a), data_mapper: fn(a) -> Row) -> html.Node
     list.map(data, data_mapper)
     |> Table(header, _)
 
-  html.table([class("w-full border-collapse border border-slate-600")], [
-    html.thead([], [
-      html.tr([], {
-        use elem <- list.map(table.header.elements)
-        html.th_text(
-          [class("border border-slate-600"), attr.Attr("scope", "col")],
-          elem,
-        )
-      }),
-    ]),
-    html.tbody([], {
+  let body_content = case list.length(data) {
+    0 -> [
+      html.tr([], [
+        html.td_text(
+          [
+            attr.Attr("colspan", list.length(header.elements) |> int.to_string),
+            class("text-center p-8"),
+          ],
+          "No Data",
+        ),
+      ]),
+    ]
+    _ -> {
       use row <- list.map(table.rows)
       html.tr(
         [],
@@ -68,6 +71,19 @@ pub fn of(header: Header, data: List(a), data_mapper: fn(a) -> Row) -> html.Node
           )
         }),
       )
-    }),
+    }
+  }
+
+  html.table([class("w-full border-collapse border border-slate-600")], [
+    html.thead([], [
+      html.tr([], {
+        use elem <- list.map(table.header.elements)
+        html.th_text(
+          [class("border border-slate-600"), attr.Attr("scope", "col")],
+          elem,
+        )
+      }),
+    ]),
+    html.tbody([], body_content),
   ])
 }

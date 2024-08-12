@@ -1,4 +1,7 @@
+import gleam/http/request
+import gleam/result
 import nakai/attr.{type Attr}
+import wisp
 
 pub fn get(value: String) -> Attr {
   attr.Attr("hx-get", value)
@@ -21,4 +24,8 @@ pub fn boost(value: Bool) -> Attr {
     True -> attr.Attr("hx-boost", "true")
     False -> attr.Attr("hx-boost", "false")
   }
+}
+
+pub fn is_hx_request(req: wisp.Request) -> Bool {
+  request.get_header(req, "hx-request") |> result.is_ok()
 }

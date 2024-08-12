@@ -1,18 +1,13 @@
-import app/error.{type AppError}
 import app/web.{type Context}
 import db/product as product_db
-import domain/product.{type Product}
 import gleam/http.{Get, Post}
 import gleam/io
-import gleam/list
-import gleam/option
-import gleam/result.{try}
-import gleam/string
 import nakai
-import sqlight
-import ui/generic/table
+import nakai/attr
+import nakai/html
+import ui/hx
 import ui/layout
-import util/formatters
+import ui/pages/product as product_page
 import wisp.{type Request, type Response}
 
 // `/products`
@@ -24,19 +19,35 @@ pub fn all(req: Request, ctx: Context) -> Response {
 }
 
 fn list_products(req: Request, ctx: Context) -> Response {
-  // let products = product_db.read_all(ctx.db)
-  //
-  // use header <- web.get_header(req, "hx-request")
-  // case header {
-  //   // Table
-  //   Ok(_) ->
-  //
-  //     |> nakai.to_inline_string_builder
-  //     |> wisp.html_response(200)
-  //   Error(_) ->
-  //     
-  //     |> nakai.to_string_builder
-  //     |> wisp.html_response(200)
-  // }
-  wisp.ok()
+  case hx.is_hx_request(req) {
+    True -> {
+      let products = product_db.read_all(ctx.db)
+      case products {
+        Ok(products) ->
+          html.Fragment([
+            html.h1_text([attr.class("text-xl bold mb-6")], "Products"),
+            product_page.table(products),
+          ])
+          |> to_ok
+        Error(_) ->
+          html.Fragment([
+            product_page.table([]),
+            layout.add_toast(html.span_text(
+              [],
+              "There was a problem retrieving products",
+            )),
+          ])
+          // Make this return the correct http code
+          |> to_ok
+      }
+    }
+    False -> {
+      product_page.full_page()
+      |> to_ok
+    }
+  }
+}
+
+fn to_ok(content) -> Response {
+  content |> nakai.to_inline_string_builder |> wisp.html_response(200)
 }

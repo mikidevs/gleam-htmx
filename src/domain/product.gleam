@@ -70,18 +70,8 @@ pub fn category_decoder(dyn: Dynamic) -> Result(Category, DecodeErrors) {
 }
 
 pub fn currency_decoder(dyn: Dynamic) -> Result(Currency, DecodeErrors) {
-  use c_str <- try(dynamic.string(dyn))
-
-  use currency <- try(
-    case float.parse(c_str) {
-      Ok(value) -> Ok(Currency("R", value))
-      _ -> Error(Nil)
-    }
-    |> result.map_error(fn(_) {
-      [DecodeError(expected: "currency", found: c_str, path: ["currency"])]
-    }),
-  )
-  Ok(currency)
+  use value <- try(dynamic.float(dyn))
+  Ok(Currency("R", value))
 }
 
 pub fn status_decoder(dyn: Dynamic) -> Result(Status, DecodeErrors) {

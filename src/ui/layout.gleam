@@ -49,14 +49,32 @@ fn nav() -> Node {
   ])
 }
 
-pub fn empty() -> Node {
-  with_content(html.div([], []))
+pub fn add_toast(content: Node) -> Node {
+  html.div(
+    [attr.id("toast-container"), attr.Attr("hx-swap-oob", "beforeend")],
+    // TODO: add toast types
+    [
+      html.div(
+        [class("bg-slate-800 border border-slate-600 rounded-lg shadow p-4")],
+        [content],
+      ),
+    ],
+  )
 }
 
 pub fn with_content(content: Node) -> Node {
   html.Html([attr.lang("en-US")], [
     head(),
     html.Body([class("flex")], [
+      html.div(
+        [
+          attr.id("toast-container"),
+          class(
+            "fixed top-5 right-5 items-center text-gray-500 flex flex-col gap-4",
+          ),
+        ],
+        [],
+      ),
       nav(),
       html.main([attr.id("content"), class("grow bg-slate-900 p-8")], [content]),
     ]),
