@@ -8,7 +8,11 @@ import util/formatters
 
 pub fn full_page() {
   layout.with_content(html.div_text(
-    [hx.get("/products"), hx.target("#content"), hx.trigger("load")],
+    [
+      hx.get("/products?pageNumber=1&pageSize=10"),
+      hx.target("#content"),
+      hx.trigger("load"),
+    ],
     "Loading...",
   ))
 }

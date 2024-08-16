@@ -7,6 +7,7 @@ import nakai/attr
 import nakai/html
 import ui/hx
 import ui/layout
+import ui/page
 import ui/pages/product as product_page
 import wisp.{type Request, type Response}
 
@@ -19,9 +20,11 @@ pub fn all(req: Request, ctx: Context) -> Response {
 }
 
 fn list_products(req: Request, ctx: Context) -> Response {
+  let page = wisp.get_query(req) |> page.page_decoder
+
   case hx.is_hx_request(req) {
     True -> {
-      let products = product_db.read_all(ctx.db)
+      let products = product_db.read_page(ctx.db, page)
       case products {
         Ok(products) ->
           html.Fragment([
